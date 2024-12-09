@@ -1,5 +1,6 @@
 import uuid
-from datetime import datetime
+from typing import Any
+
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
@@ -7,10 +8,11 @@ from langchain_core.prompts import ChatPromptTemplate
 from . import gpt_key, gpt_model
 from api import logger
 from api.schemas import Plan
-from api.database import plans
 
 
-async def create_plan_chain(id: uuid.UUID, budget: int, total_days: int) -> None:
+async def create_plan_chain(
+    id: uuid.UUID, budget: int, total_days: int
+) -> dict[str, Any]:
     logger.info(f"Generating {id}...")
     model = ChatOpenAI(model=gpt_model, api_key=gpt_key).with_structured_output(Plan)
 
@@ -25,12 +27,7 @@ async def create_plan_chain(id: uuid.UUID, budget: int, total_days: int) -> None
     )
 
     chain = prompt_template | model
-    result: Plan = chain.invoke({"budget": budget, "total_days": total_days})
+    result: Plan = await chain.ainvoke({"budget": budget, "total_days": total_days})
     logger.info(f"Generated {id}")
 
-    data = result.model_dump()
-    data["id"] = id
-    data["budget"] = budget
-    data["total_days"] = total_days
-    data["timestamp"] = datetime.now()
-    plans.create(data)
+    return result.model_dump()
