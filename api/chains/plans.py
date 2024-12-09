@@ -1,19 +1,11 @@
-import uuid
-from typing import Any
-
-
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 from . import gpt_key, gpt_model
-from api import logger
 from api.schemas import Plan
 
 
-async def create_plan_chain(
-    id: uuid.UUID, budget: int, total_days: int
-) -> dict[str, Any]:
-    logger.info(f"Generating {id}...")
+async def create_plan_chain(budget: int, total_days: int) -> Plan:
     model = ChatOpenAI(model=gpt_model, api_key=gpt_key).with_structured_output(Plan)
 
     system_template = "You are an AI travel agent who creates vacation plans."
@@ -27,7 +19,5 @@ async def create_plan_chain(
     )
 
     chain = prompt_template | model
-    result: Plan = await chain.ainvoke({"budget": budget, "total_days": total_days})
-    logger.info(f"Generated {id}")
-
-    return result.model_dump()
+    result = await chain.ainvoke({"budget": budget, "total_days": total_days})
+    return result
