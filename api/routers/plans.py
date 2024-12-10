@@ -1,10 +1,10 @@
 from datetime import datetime
 
-import pymongo
-from fastapi import APIRouter, HTTPException, Response, Depends, status
+from fastapi import APIRouter, Response, Depends, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from api import logger
+from api.crud import plans as crud_plans
 from api.chains.plans import create_plan_chain
 from api.database.manager import get_database
 from api.schemas import (
@@ -28,9 +28,9 @@ async def create_plan(
     plan = plan.model_dump()
     plan["timestamp"] = datetime.now()
     plan = data | plan
-    new_plan = await db["plans"].insert_one(plan)
-    logger.info(f"Plan created: {new_plan.inserted_id}")
-    return {"id": new_plan.inserted_id}
+    created_plan = await crud_plans.create_plan(plan, db)
+    logger.info(f"Plan created: {created_plan.inserted_id}")
+    return {"id": created_plan.inserted_id}
 
 
 @router.get("/", response_model=list[ReadPlansOutput])
@@ -38,16 +38,7 @@ async def read_plans(
     limit: int = 10, db: AsyncIOMotorDatabase = Depends(get_database)
 ) -> list[ReadPlansOutput]:
     logger.info(f"Reading plans: {limit}")
-    plans = (
-        await db["plans"]
-        .find(
-            {},
-            {"_id": 1, "title": 1, "description": 1},
-            sort=[("timestamp", pymongo.DESCENDING)],
-            limit=limit,
-        )
-        .to_list()
-    )
+    plans = await crud_plans.read_plans(limit, db)
     logger.info(f"Plans read: {plans}")
     return plans
 
@@ -57,11 +48,9 @@ async def read_plan(
     id: PyObjectId, db: AsyncIOMotorDatabase = Depends(get_database)
 ) -> ReadPlanOutput:
     logger.info(f"Reading plan: {id}")
-    plan = await db["plans"].find_one({"_id": id})
-    if plan is not None:
-        logger.info(f"Plan read: {plan}")
-        return plan
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found.")
+    plan = await crud_plans.read_plan(id, db)
+    logger.info(f"Plan read: {plan}")
+    return plan
 
 
 @router.delete("/{id}")
@@ -69,8 +58,6 @@ async def delete_plan(
     id: PyObjectId, db: AsyncIOMotorDatabase = Depends(get_database)
 ) -> Response:
     logger.info(f"Deleting plan: {id}")
-    deleted_plan = await db["plans"].delete_one({"_id": id})
-    if deleted_plan.deleted_count == 1:
-        logger.info(f"Plan deleted: {id}")
-        return Response(status_code=status.HTTP_204_NO_CONTENT)
-    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found.")
+    response = await crud_plans.delete_plan(id, db)
+    logger.info(f"Plan deleted: {id}")
+    return response
