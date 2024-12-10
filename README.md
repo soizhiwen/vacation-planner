@@ -1,4 +1,4 @@
-# Vacation Planner
+# Vacation Planner (ongoing)
 
 Vacation Planner is a comprehensive tool designed to generate detailed vacation itineraries based on specific budgets and travel durations. By leveraging cutting-edge technologies, this tool aims to simplify travel planning, providing users with a seamless and tailored experience.
 
