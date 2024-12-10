@@ -2,7 +2,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
 
 from . import gpt_key, gpt_model
-from api.schemas import Plan
+from api.schemas.plan import Plan
 
 
 async def create_plan_chain(budget: int, total_days: int) -> Plan:

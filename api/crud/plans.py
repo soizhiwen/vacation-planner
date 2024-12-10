@@ -3,7 +3,8 @@ from pymongo.results import InsertOneResult
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi import HTTPException, Response, status
 
-from api.schemas import PyObjectId, CreatePlanInput, ReadPlanOutput, ReadPlansOutput
+from api.schemas.common import PyObjectId
+from api.schemas.plan import CreatePlanInput, ReadPlanOutput, ReadPlansOutput
 
 
 async def create_plan(

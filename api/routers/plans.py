@@ -7,8 +7,8 @@ from api import logger
 from api.crud import plans as crud_plans
 from api.chains.plans import create_plan_chain
 from api.database.manager import get_database
-from api.schemas import (
-    PyObjectId,
+from api.schemas.common import PyObjectId
+from api.schemas.plan import (
     CreatePlanInput,
     CreatePlanOutput,
     ReadPlanOutput,
