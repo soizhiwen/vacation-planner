@@ -4,17 +4,17 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi import HTTPException, Response, status
 
 from api.schemas.common import PyObjectId
-from api.schemas.plan import CreatePlanInput, ReadPlanOutput, ReadPlansOutput
+from api.schemas.plan import UserInputSchema, ReadPlanSchema, ReadPlansSchema
 
 
 async def create_plan(
-    plan: CreatePlanInput, db: AsyncIOMotorDatabase
+    plan: UserInputSchema, db: AsyncIOMotorDatabase
 ) -> InsertOneResult:
     created_plan = await db["plans"].insert_one(plan)
     return created_plan
 
 
-async def read_plans(limit: int, db: AsyncIOMotorDatabase) -> list[ReadPlansOutput]:
+async def read_plans(limit: int, db: AsyncIOMotorDatabase) -> list[ReadPlansSchema]:
     plans = (
         await db["plans"]
         .find(
@@ -28,7 +28,7 @@ async def read_plans(limit: int, db: AsyncIOMotorDatabase) -> list[ReadPlansOutp
     return plans
 
 
-async def read_plan(id: PyObjectId, db: AsyncIOMotorDatabase) -> ReadPlanOutput:
+async def read_plan(id: PyObjectId, db: AsyncIOMotorDatabase) -> ReadPlanSchema:
     plan = await db["plans"].find_one({"_id": id})
     if plan is None:
         raise HTTPException(

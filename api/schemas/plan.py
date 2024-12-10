@@ -5,40 +5,40 @@ from pydantic import BaseModel, ConfigDict, Field
 from api.schemas.common import PyObjectId
 
 
-class Activity(BaseModel):
-    time: str = Field(description="The time of the activity")
-    place: str = Field(description="The place of the activity")
+class ActivitySchema(BaseModel):
+    time: str = Field(description="The suggested time for the activity")
+    place: str = Field(description="The name of the place")
     activity: str = Field(description="The activity to do")
     notes: str = Field(description="Additional notes for the activity")
 
 
-class Day(BaseModel):
+class DaySchema(BaseModel):
     day: int = Field(description="The day of the plan")
-    activities: list[Activity] = Field(description="The activities for the day")
+    activities: list[ActivitySchema] = Field(description="The activities for the day")
 
 
-class Header(BaseModel):
+class HeaderSchema(BaseModel):
     title: str = Field(description="The title of the plan")
     description: str = Field(description="The description of the plan")
 
 
-class Plan(Header):
-    days: list[Day] = Field(description="The days of the plan")
+class PlanSchema(HeaderSchema):
+    days: list[DaySchema] = Field(description="The days of the plan")
 
 
-class CreatePlanInput(BaseModel):
+class UserInputSchema(BaseModel):
     budget: int = Field(description="The budget for vacation")
     total_days: int = Field(description="The total days for vacation")
 
 
-class CreatePlanOutput(BaseModel):
+class CreatePlanSchema(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
     id: PyObjectId = Field(alias="_id", description="ID of the plan")
 
 
-class ReadPlanOutput(Plan, CreatePlanInput, CreatePlanOutput):
+class ReadPlanSchema(CreatePlanSchema, UserInputSchema, PlanSchema):
     timestamp: datetime = Field(description="The timestamp of the plan creation")
 
 
-class ReadPlansOutput(Header, CreatePlanOutput):
+class ReadPlansSchema(CreatePlanSchema, HeaderSchema):
     pass
