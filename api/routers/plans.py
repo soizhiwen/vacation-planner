@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Response, Depends, status
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from api import logger
-from api.chains.plan import create_plan_chain
+from api.chains.plans import create_plan_chain
 from api.database.manager import get_database
 from api.schemas import (
     PyObjectId,
