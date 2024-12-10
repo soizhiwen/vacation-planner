@@ -1,10 +1,12 @@
 from datetime import datetime
 
 import pymongo
-from fastapi import APIRouter, HTTPException, Request, Response, status
+from fastapi import APIRouter, HTTPException, Response, Depends, status
+from motor.motor_asyncio import AsyncIOMotorDatabase
 
 from api import logger
-from api.chains.plans import create_plan_chain
+from api.chains.plan import create_plan_chain
+from api.database.manager import get_database
 from api.schemas import (
     PyObjectId,
     CreatePlanInput,
@@ -17,35 +19,45 @@ router = APIRouter(prefix="/plans")
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=CreatePlanOutput)
-async def create_plan(data: CreatePlanInput, req: Request) -> CreatePlanOutput:
+async def create_plan(
+    data: CreatePlanInput, db: AsyncIOMotorDatabase = Depends(get_database)
+) -> CreatePlanOutput:
     logger.info(f"Creating plan: {data}")
     data = data.model_dump()
     plan = await create_plan_chain(**data)
     plan = plan.model_dump()
     plan["timestamp"] = datetime.now()
     plan = data | plan
-    new_plan = req.app.db["plans"].insert_one(plan)
+    new_plan = await db["plans"].insert_one(plan)
     logger.info(f"Plan created: {new_plan.inserted_id}")
     return {"id": new_plan.inserted_id}
 
 
 @router.get("/", response_model=list[ReadPlansOutput])
-async def read_plans(req: Request, limit: int = 10) -> list[ReadPlansOutput]:
+async def read_plans(
+    limit: int = 10, db: AsyncIOMotorDatabase = Depends(get_database)
+) -> list[ReadPlansOutput]:
     logger.info(f"Reading plans: {limit}")
-    plans = req.app.db["plans"].find(
-        {},
-        {"_id": 1, "title": 1, "description": 1},
-        sort=[("timestamp", pymongo.DESCENDING)],
-        limit=limit,
+    plans = (
+        await db["plans"]
+        .find(
+            {},
+            {"_id": 1, "title": 1, "description": 1},
+            sort=[("timestamp", pymongo.DESCENDING)],
+            limit=limit,
+        )
+        .to_list()
     )
     logger.info(f"Plans read: {plans}")
-    return list(plans)
+    return plans
 
 
 @router.get("/{id}", response_model=ReadPlanOutput)
-async def read_plan(id: PyObjectId, req: Request) -> ReadPlanOutput:
+async def read_plan(
+    id: PyObjectId, db: AsyncIOMotorDatabase = Depends(get_database)
+) -> ReadPlanOutput:
     logger.info(f"Reading plan: {id}")
-    plan = req.app.db["plans"].find_one({"_id": id})
+    plan = await db["plans"].find_one({"_id": id})
     if plan is not None:
         logger.info(f"Plan read: {plan}")
         return plan
@@ -53,11 +65,12 @@ async def read_plan(id: PyObjectId, req: Request) -> ReadPlanOutput:
 
 
 @router.delete("/{id}")
-async def delete_plan(id: PyObjectId, req: Request, res: Response) -> Response:
+async def delete_plan(
+    id: PyObjectId, db: AsyncIOMotorDatabase = Depends(get_database)
+) -> Response:
     logger.info(f"Deleting plan: {id}")
-    deleted_plan = req.app.db["plans"].delete_one({"_id": id})
+    deleted_plan = await db["plans"].delete_one({"_id": id})
     if deleted_plan.deleted_count == 1:
-        res.status_code = status.HTTP_204_NO_CONTENT
         logger.info(f"Plan deleted: {id}")
-        return res
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Plan not found.")

@@ -1,4 +1,4 @@
 fastapi[standard]==0.115.6
 langchain==0.3.10
 langchain-openai==0.2.11
-pymongo[srv]==4.10.1
+motor==3.6.0
