@@ -8,7 +8,6 @@ from fastapi.exceptions import HTTPException, RequestValidationError
 from starlette.requests import Request
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-
 from api import logger
 from api.routers import plans
 from api.database.manager import mongo_manager
