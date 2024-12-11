@@ -3,6 +3,11 @@
 Vacation Planner is a comprehensive tool designed to generate detailed vacation itineraries based on specific budgets and travel durations. By leveraging cutting-edge technologies, this tool aims to simplify travel planning, providing users with a seamless and tailored experience.
 
 
+## Problem
+
+Planning a vacation can be challenging, especially when constrained by budget and limited time. Deciding where to go, what to do, and how to make the most of the available period often becomes overwhelming, leaving travelers unsure of the best options.
+
+
 ## Features
 
 - Create detailed vacation plans based on budget and time constraints.
