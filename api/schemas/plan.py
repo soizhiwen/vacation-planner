@@ -27,12 +27,15 @@ class PlanSchema(HeaderSchema):
 
 
 class UserInputSchema(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
     budget: int = Field(description="The budget for vacation")
-    total_days: int = Field(description="The total days for vacation")
+    total_days: int = Field(alias="totalDays", description="The total days for vacation")
 
 
 class CreatePlanSchema(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
+
     id: PyObjectId = Field(alias="_id", description="ID of the plan")
 
 
