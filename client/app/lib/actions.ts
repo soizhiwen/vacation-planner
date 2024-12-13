@@ -94,3 +94,20 @@ export async function readPlans(limit: number) {
 
     return await res.json();
 }
+
+
+export async function deletePlan(id: string) {
+    let res: Response;
+    try {
+        res = await fetch(`${apiUrl}/plans/${id}`, { method: 'DELETE' });
+
+        if (!res.ok) {
+            throw new Error('Failed to delete plan.');
+        }
+
+    } catch (error) {
+        return { message: 'Fetch Error: Failed to delete plan.' };
+    }
+
+    return { message: 'Deleted plan.' };
+}
