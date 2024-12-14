@@ -19,3 +19,5 @@ export type Plan = {
     days: Day[];
     timestamp: Date;
 }
+
+export type Plans = Plan[];
