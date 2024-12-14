@@ -17,7 +17,13 @@ export type Plan = {
     budget: number;
     totalDays: number;
     days: Day[];
-    timestamp: Date;
+    timestamp: string;
+}
+
+export type PlanWithHeader = {
+    _id: string;
+    title: string;
+    description: string;
 }
 
 export type Plans = Plan[];
