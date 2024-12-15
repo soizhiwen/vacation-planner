@@ -2,11 +2,13 @@
 
 import Form from 'next/form'
 import { useActionState } from 'react';
-import { createPlan, State } from '@/app/lib/actions';
+import { createPlan } from '@/app/lib/actions';
+import { CreatePlanState } from '@/app/lib/definitions';
+import { CreatePlan } from '@/app/ui/plans/buttons';
 
 export default function CreateForm() {
-  const initialState: State = { errors: {}, message: null };
-  const [state, formAction] = useActionState(createPlan, initialState);
+  const initialState: CreatePlanState = { errors: {}, message: null };
+  const [state, formAction, isPending] = useActionState(createPlan, initialState);
 
   return (
     <Form action={formAction}>
@@ -57,9 +59,7 @@ export default function CreateForm() {
           </p>
         }
       </div>
-      <button type="submit">
-        Generate
-      </button>
+      <CreatePlan isPending={isPending} />
     </Form>
   );
 }
