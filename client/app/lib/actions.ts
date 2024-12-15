@@ -1,33 +1,15 @@
 'use server';
 
-import { z } from 'zod';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { CreatePlanState } from '@/app/lib/definitions';
+import { CreatePlanFormSchema } from '@/app/lib/schemas';
 
-const FormSchema = z.object({
-    budget: z.coerce
-        .number({ message: 'Budget must be a number.' })
-        .int({ message: 'Budget must be a number.' })
-        .nonnegative({ message: 'Please enter an amount greater than $0.' }),
-    totalDays: z.coerce
-        .number({ message: 'Total days must be a number.' })
-        .int({ message: 'Total days must be a number.' })
-        .nonnegative({ message: 'Please enter a number greater than 0.' }),
-});
-
-
-export type State = {
-    errors?: {
-        budget?: string[];
-        totalDays?: string[];
-    };
-    message?: string | null;
-};
 
 const apiUrl = process.env.API_URL || 'http://127.0.0.1:8000';
 
-export async function createPlan(prevState: State, formData: FormData) {
-    const validatedFields = FormSchema.safeParse({
+export async function createPlan(prevState: CreatePlanState, formData: FormData) {
+    const validatedFields = CreatePlanFormSchema.safeParse({
         budget: formData.get('budget'),
         totalDays: formData.get('totalDays'),
     });
@@ -39,21 +21,13 @@ export async function createPlan(prevState: State, formData: FormData) {
         };
     }
 
-    let res: Response;
-    try {
-        res = await fetch(`${apiUrl}/plans/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(validatedFields.data),
-        });
+    const res = await fetch(`${apiUrl}/plans/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(validatedFields.data),
+    });
 
-        if (!res.ok) {
-            throw new Error('Failed to create plan.');
-        }
-
-    } catch (error) {
-        return { message: 'Fetch Error: Failed to create plan.' };
-    }
+    if (!res.ok) return { message: 'Failed to create plan.' };
 
     const json = await res.json();
 
@@ -63,51 +37,21 @@ export async function createPlan(prevState: State, formData: FormData) {
 
 
 export async function readPlan(id: string) {
-    let res: Response;
-    try {
-        res = await fetch(`${apiUrl}/plans/${id}`, { method: 'GET' });
-
-        if (!res.ok) {
-            throw new Error('Failed to read plan.');
-        }
-
-    } catch (error) {
-        return { message: 'Fetch Error: Failed to read plan.' };
-    }
-
+    const res = await fetch(`${apiUrl}/plans/${id}`, { method: 'GET' });
+    if (!res.ok) return undefined;
     return await res.json();
 }
 
 
 export async function readPlans(limit: number) {
-    let res: Response;
-    try {
-        res = await fetch(`${apiUrl}/plans/?limit=${limit}`, { method: 'GET' });
-
-        if (!res.ok) {
-            throw new Error('Failed to read plans.');
-        }
-
-    } catch (error) {
-        return { message: 'Fetch Error: Failed to read plans.' };
-    }
-
+    const res = await fetch(`${apiUrl}/plans/?limit=${limit}`, { method: 'GET' });
+    if (!res.ok) throw new Error('Failed to read plans.');
     return await res.json();
 }
 
 
 export async function deletePlan(id: string) {
-    let res: Response;
-    try {
-        res = await fetch(`${apiUrl}/plans/${id}`, { method: 'DELETE' });
-
-        if (!res.ok) {
-            throw new Error('Failed to delete plan.');
-        }
-
-    } catch (error) {
-        return { message: 'Fetch Error: Failed to delete plan.' };
-    }
-
-    return { message: 'Deleted plan.' };
+    const res = await fetch(`${apiUrl}/plans/${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to delete plan.');
+    revalidatePath('/plans');
 }
