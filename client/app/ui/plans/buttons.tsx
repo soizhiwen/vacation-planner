@@ -16,8 +16,8 @@ export function CreatePlan({ isPending }: { isPending: boolean }) {
 }
 
 
-export function DeletePlan({ id }: { id: string }) {
-    const deletePlanWithId = deletePlan.bind(null, id);
+export function DeletePlan({ id, isRedirect }: { id: string, isRedirect: boolean }) {
+    const deletePlanWithId = deletePlan.bind(null, id, isRedirect);
 
     return (
         <Form action={deletePlanWithId}>

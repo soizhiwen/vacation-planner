@@ -30,7 +30,10 @@ export default async function Page(props: {
                 {plan.description}
               </p>
             </div>
-            <DeletePlan id={plan._id} />
+            <DeletePlan
+              id={plan._id}
+              isRedirect={false}
+            />
           </div >
         ))
       }

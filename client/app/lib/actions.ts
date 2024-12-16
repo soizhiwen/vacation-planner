@@ -50,8 +50,11 @@ export async function readPlans(limit: number) {
 }
 
 
-export async function deletePlan(id: string) {
+export async function deletePlan(id: string, isRedirect: boolean) {
     const res = await fetch(`${apiUrl}/plans/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error('Failed to delete plan.');
     revalidatePath('/plans');
+    if (isRedirect) {
+        redirect('/plans');
+    }
 }

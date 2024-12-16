@@ -50,7 +50,10 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         ))
       }
       <p>Last update: {timestamp.toLocaleString()}</p>
-      {/* <DeletePlan id={plan._id} /> */}
+      <DeletePlan
+        id={plan._id}
+        isRedirect={true}
+      />
     </div>
   );
 }
